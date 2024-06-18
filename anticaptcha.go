@@ -1,4 +1,4 @@
-package main
+package anticaptcha
 
 import (
 	"bytes"
@@ -39,6 +39,14 @@ type ImageSettings struct {
 	MaxLength     int
 	LanguagePool  string
 	Comment       string
+}
+
+type RecaptchaV2 struct {
+	WebsiteURL    string
+	WebsiteKey    string
+	WebsiteSToken string
+	IsInvisible   bool
+	DataSValue    string
 }
 
 func NewClient(apiKey string) *Client {
@@ -93,34 +101,23 @@ func (ac *Client) SolveImageFile(path string, settings ImageSettings) (string, e
 }
 
 func (ac *Client) SolveImage(body string, settings ImageSettings) (string, error) { //, phrase bool, caseSensitive bool, isNumeric bool
-	taskCreateResult, err := ac.JSONRequest("createTask", map[string]interface{}{
-		"clientKey": ac.ClientKey,
-		"task": map[string]interface{}{
-			"type":      "ImageToTextTask",
-			"body":      body,
-			"phrase":    settings.Phrase,
-			"case":      settings.CaseSensitive,
-			"numeric":   settings.Numeric,
-			"comment":   settings.Comment,
-			"math":      settings.MathOperation,
-			"minLength": settings.MinLength,
-			"maxLength": settings.MaxLength,
-		},
+	task := map[string]interface{}{
+		"type":         "ImageToTextTask",
+		"body":         body,
+		"phrase":       settings.Phrase,
+		"case":         settings.CaseSensitive,
+		"numeric":      settings.Numeric,
+		"comment":      settings.Comment,
+		"math":         settings.MathOperation,
+		"minLength":    settings.MinLength,
+		"maxLength":    settings.MaxLength,
 		"languagePool": settings.LanguagePool,
-		"softId":       ac.SoftId,
-	})
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
 		return "", err
 	}
-	if taskID, ok := taskCreateResult["taskId"].(float64); ok {
-		ac.TaskID = int(taskID)
-		solution, err := ac.WaitForResult(ac.TaskID)
-		if err != nil {
-			return "", err
-		}
-		return solution["text"].(string), nil
-	}
-	return "", errors.New(taskCreateResult["errorCode"].(string))
+	return solution["text"].(string), nil
 }
 
 func (ac *Client) ReportIncorrectImageCaptcha() error {
@@ -131,41 +128,53 @@ func (ac *Client) ReportIncorrectImageCaptcha() error {
 	return err
 }
 
-func (ac *Client) SetRecaptchaDataSValue(value string) {
-	ac.RecaptchaDataSValue = &value
-}
-
-func (ac *Client) SolveRecaptchaV2Proxyless(websiteURL, websiteKey string, isInvisible bool) (string, error) {
+func (ac *Client) SolveRecaptchaV2Proxyless(recaptcha RecaptchaV2) (string, error) {
 	task := map[string]interface{}{
 		"type":                "RecaptchaV2TaskProxyless",
-		"websiteURL":          websiteURL,
-		"websiteKey":          websiteKey,
-		"websiteSToken":       ac.WebsiteSToken,
-		"recaptchaDataSValue": ac.RecaptchaDataSValue,
+		"websiteURL":          recaptcha.WebsiteURL,
+		"websiteKey":          recaptcha.WebsiteKey,
+		"websiteSToken":       recaptcha.WebsiteSToken,
+		"recaptchaDataSValue": recaptcha.DataSValue,
 	}
-	if isInvisible {
+	if recaptcha.IsInvisible {
 		task["isInvisible"] = true
 	}
-	taskCreateResult, err := ac.JSONRequest("createTask", map[string]interface{}{
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	if cookies, ok := solution["cookies"].([]string); ok {
+		ac.Cookies = &cookies
+	}
+	return solution["gRecaptchaResponse"].(string), nil
+}
+
+func CreateTaskAndWaitForResult(ac *Client, task map[string]interface{}) (map[string]interface{}, error) {
+	payload := map[string]interface{}{
 		"clientKey": ac.ClientKey,
 		"task":      task,
 		"softId":    ac.SoftId,
-	})
+	}
+	if task["languagePool"] != nil {
+		payload["languagePool"] = task["languagePool"]
+	}
+	taskCreateResult, err := ac.JSONRequest("createTask", payload)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if taskID, ok := taskCreateResult["taskId"].(float64); ok {
 		ac.TaskID = int(taskID)
 		solution, err := ac.WaitForResult(ac.TaskID)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		if cookies, ok := solution["cookies"].([]string); ok {
-			ac.Cookies = &cookies
-		}
-		return solution["gRecaptchaResponse"].(string), nil
+		return solution, nil
 	}
-	return "", errors.New(taskCreateResult["errorCode"].(string))
+	return nil, errors.New(taskCreateResult["errorCode"].(string))
+}
+
+func (ac *Client) GetCookies() *[]string {
+	return ac.Cookies
 }
 
 func (ac *Client) ReportIncorrectRecaptcha() error {
