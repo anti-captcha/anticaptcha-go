@@ -8,6 +8,11 @@ To use the service you need to [register](https://anti-captcha.com/clients/) and
 
 For more technical information and articles visit our [documentation](https://anti-captcha.com/apidoc) page. 
 
+**Install the module**:
+```bash
+go get github.com/anti-captcha/anticaptcha-go
+```
+
 **Examples how to solve:**
 
 - [Image Captcha](#solve-image-captcha-with-go-example)
