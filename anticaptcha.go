@@ -14,20 +14,16 @@ import (
 
 type Client struct {
 	ClientKey                   string
-	WebsiteSToken               *string
-	RecaptchaDataSValue         *string
 	ConnectionTimeout           int
 	FirstAttemptWaitingInterval int
 	NormalWaitingInterval       int
 	IsVerbose                   bool
 	TaskID                      int
-	FuncaptchaApiJSSubdomain    *string
-	FuncaptchaDataBlob          *string
-	SoftId                      int
-	OSTronAddress               string
-	HcaptchaUserAgent           *string
-	HcaptchaRespKey             *string
-	Cookies                     *[]string
+
+	SoftId            int
+	HcaptchaUserAgent string
+	HcaptchaRespKey   string
+	Cookies           []string
 }
 
 type ImageSettings struct {
@@ -39,6 +35,15 @@ type ImageSettings struct {
 	MaxLength     int
 	LanguagePool  string
 	Comment       string
+	WebsiteURL    string
+}
+
+type Proxy struct {
+	Type      string
+	IPAddress string
+	Port      int
+	Login     string
+	Password  string
 }
 
 type RecaptchaV2 struct {
@@ -47,6 +52,66 @@ type RecaptchaV2 struct {
 	WebsiteSToken string
 	IsInvisible   bool
 	DataSValue    string
+	UserAgent     string
+	Proxy         *Proxy
+}
+
+type RecaptchaV3 struct {
+	WebsiteURL   string
+	WebsiteKey   string
+	MinScore     float64
+	PageAction   string
+	IsEnterprise bool
+	APIDomain    string
+}
+
+type Hcaptcha struct {
+	WebsiteURL        string
+	WebsiteKey        string
+	IsInvisible       bool
+	IsEnterprise      bool
+	EnterprisePayload map[string]interface{}
+	Proxy             *Proxy
+}
+
+type FunCaptcha struct {
+	WebsiteURL       string
+	WebsitePublicKey string
+	ApiSubdomain     string
+	DataBlob         string
+	Proxy            *Proxy
+}
+
+type Turnstile struct {
+	WebsiteURL string
+	WebsiteKey string
+	Action     string
+	CData      string
+	Proxy      *Proxy
+}
+
+type GeeTest struct {
+	WebsiteURL     string
+	Gt             string
+	Challenge      string
+	ApiSubdomain   string
+	Version        int
+	InitParameters map[string]interface{}
+	Proxy          *Proxy
+}
+
+type AntiGate struct {
+	WebsiteURL        string
+	TemplateName      string
+	Variables         map[string]interface{}
+	DomainsOfInterest []string
+	Proxy             *Proxy
+}
+
+type ImageToCoordinates struct {
+	Mode       string
+	Comment    string
+	WebsiteURL string
 }
 
 func NewClient(apiKey string) *Client {
@@ -93,7 +158,7 @@ func (ac *Client) GetCreditsBalance() (float64, error) {
 }
 
 func (ac *Client) SolveImageFile(path string, settings ImageSettings) (string, error) {
-	imageData, err := readImageFile(path)
+	imageData, err := ac.ReadImageFile(path)
 	if err != nil {
 		return "", err
 	}
@@ -128,7 +193,7 @@ func (ac *Client) ReportIncorrectImageCaptcha() error {
 	return err
 }
 
-func (ac *Client) SolveRecaptchaV2Proxyless(recaptcha RecaptchaV2) (string, error) {
+func (ac *Client) SolveRecaptchaV2(recaptcha RecaptchaV2) (string, error) {
 	task := map[string]interface{}{
 		"type":                "RecaptchaV2TaskProxyless",
 		"websiteURL":          recaptcha.WebsiteURL,
@@ -144,9 +209,250 @@ func (ac *Client) SolveRecaptchaV2Proxyless(recaptcha RecaptchaV2) (string, erro
 		return "", err
 	}
 	if cookies, ok := solution["cookies"].([]string); ok {
-		ac.Cookies = &cookies
+		ac.Cookies = cookies
 	}
 	return solution["gRecaptchaResponse"].(string), nil
+}
+
+func (ac *Client) SolveRecaptchaV2ProxyOn(recaptcha RecaptchaV2) (string, error) {
+	task := map[string]interface{}{
+		"type":                "RecaptchaV2Task",
+		"websiteURL":          recaptcha.WebsiteURL,
+		"websiteKey":          recaptcha.WebsiteKey,
+		"websiteSToken":       recaptcha.WebsiteSToken,
+		"recaptchaDataSValue": recaptcha.DataSValue,
+		"userAgent":           recaptcha.UserAgent,
+		"proxyType":           recaptcha.Proxy.Type,
+		"proxyAddress":        recaptcha.Proxy.IPAddress,
+		"proxyPort":           recaptcha.Proxy.Port,
+		"proxyLogin":          recaptcha.Proxy.Login,
+		"proxyPassword":       recaptcha.Proxy.Password,
+	}
+	if recaptcha.IsInvisible {
+		task["isInvisible"] = true
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	if cookies, ok := solution["cookies"].([]string); ok {
+		ac.Cookies = cookies
+	}
+	return solution["gRecaptchaResponse"].(string), nil
+}
+
+func (ac *Client) SolveRecaptchaV3(recaptcha RecaptchaV3) (string, error) {
+	task := map[string]interface{}{
+		"type":         "RecaptchaV3TaskProxyless",
+		"websiteURL":   recaptcha.WebsiteURL,
+		"websiteKey":   recaptcha.WebsiteKey,
+		"minScore":     recaptcha.MinScore,
+		"pageAction":   recaptcha.PageAction,
+		"isEnterprise": recaptcha.IsEnterprise,
+		"apiDomain":    recaptcha.APIDomain,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["gRecaptchaResponse"].(string), nil
+}
+
+func (ac *Client) SolveHcaptcha(hcaptcha Hcaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":              "HCaptchaTaskProxyless",
+		"websiteURL":        hcaptcha.WebsiteURL,
+		"websiteKey":        hcaptcha.WebsiteKey,
+		"isEnterprise":      hcaptcha.IsEnterprise,
+		"enterprisePayload": hcaptcha.EnterprisePayload,
+	}
+	if hcaptcha.IsInvisible {
+		task["isInvisible"] = true
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.HcaptchaUserAgent = userAgent
+	}
+	if respKey, ok := solution["respKey"].(string); ok {
+		ac.HcaptchaRespKey = respKey
+	}
+	return solution["gRecaptchaResponse"].(string), nil
+}
+
+func (ac *Client) SolveHcaptchaProxyOn(hcaptcha Hcaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":              "HCaptchaTask",
+		"websiteURL":        hcaptcha.WebsiteURL,
+		"websiteKey":        hcaptcha.WebsiteKey,
+		"isEnterprise":      hcaptcha.IsEnterprise,
+		"enterprisePayload": hcaptcha.EnterprisePayload,
+		"proxyType":         hcaptcha.Proxy.Type,
+		"proxyAddress":      hcaptcha.Proxy.IPAddress,
+		"proxyPort":         hcaptcha.Proxy.Port,
+		"proxyLogin":        hcaptcha.Proxy.Login,
+		"proxyPassword":     hcaptcha.Proxy.Password,
+	}
+	if hcaptcha.IsInvisible {
+		task["isInvisible"] = true
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.HcaptchaUserAgent = userAgent
+	}
+	if respKey, ok := solution["respKey"].(string); ok {
+		ac.HcaptchaRespKey = respKey
+	}
+	return solution["gRecaptchaResponse"].(string), nil
+}
+
+func (ac *Client) SolveFunCaptcha(funcaptcha FunCaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":                     "FunCaptchaTaskProxyless",
+		"websiteURL":               funcaptcha.WebsiteURL,
+		"websitePublicKey":         funcaptcha.WebsitePublicKey,
+		"funcaptchaApiJSSubdomain": funcaptcha.ApiSubdomain,
+		"data":                     funcaptcha.DataBlob,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveFunCaptchaProxyOn(funcaptcha FunCaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":                     "FunCaptchaTask",
+		"websiteURL":               funcaptcha.WebsiteURL,
+		"websitePublicKey":         funcaptcha.WebsitePublicKey,
+		"funcaptchaApiJSSubdomain": funcaptcha.ApiSubdomain,
+		"data":                     funcaptcha.DataBlob,
+		"proxyType":                funcaptcha.Proxy.Type,
+		"proxyAddress":             funcaptcha.Proxy.IPAddress,
+		"proxyPort":                funcaptcha.Proxy.Port,
+		"proxyLogin":               funcaptcha.Proxy.Login,
+		"proxyPassword":            funcaptcha.Proxy.Password,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveTurnstile(turnstile Turnstile) (string, error) {
+	task := map[string]interface{}{
+		"type":           "TurnstileTaskProxyless",
+		"websiteURL":     turnstile.WebsiteURL,
+		"websiteKey":     turnstile.WebsiteKey,
+		"action":         turnstile.Action,
+		"turnstileCData": turnstile.CData,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveTurnstileProxyOn(turnstile Turnstile) (string, error) {
+	task := map[string]interface{}{
+		"type":           "TurnstileTask",
+		"websiteURL":     turnstile.WebsiteURL,
+		"websiteKey":     turnstile.WebsiteKey,
+		"action":         turnstile.Action,
+		"turnstileCData": turnstile.CData,
+		"proxyType":      turnstile.Proxy.Type,
+		"proxyAddress":   turnstile.Proxy.IPAddress,
+		"proxyPort":      turnstile.Proxy.Port,
+		"proxyLogin":     turnstile.Proxy.Login,
+		"proxyPassword":  turnstile.Proxy.Password,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveGeeTest(geetest GeeTest) (map[string]interface{}, error) {
+	task := map[string]interface{}{
+		"type":                      "GeeTestTaskProxyless",
+		"websiteURL":                geetest.WebsiteURL,
+		"gt":                        geetest.Gt,
+		"challenge":                 geetest.Challenge,
+		"geetestApiServerSubdomain": geetest.ApiSubdomain,
+		"version":                   geetest.Version,
+		"initParameters":            geetest.InitParameters,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return map[string]interface{}{}, err
+	}
+	return solution, nil
+}
+
+func (ac *Client) SolveGeeTestProxyOn(geetest GeeTest) (map[string]interface{}, error) {
+	task := map[string]interface{}{
+		"type":                      "GeeTestTask",
+		"websiteURL":                geetest.WebsiteURL,
+		"gt":                        geetest.Gt,
+		"challenge":                 geetest.Challenge,
+		"geetestApiServerSubdomain": geetest.ApiSubdomain,
+		"version":                   geetest.Version,
+		"initParameters":            geetest.InitParameters,
+		"proxyType":                 geetest.Proxy.Type,
+		"proxyAddress":              geetest.Proxy.IPAddress,
+		"proxyPort":                 geetest.Proxy.Port,
+		"proxyLogin":                geetest.Proxy.Login,
+		"proxyPassword":             geetest.Proxy.Password,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return map[string]interface{}{}, err
+	}
+	return solution, nil
+}
+
+func (ac *Client) SolveAntiGate(antigate AntiGate) (map[string]interface{}, error) {
+	task := map[string]interface{}{
+		"type":              "AntiGateTask",
+		"websiteURL":        antigate.WebsiteURL,
+		"templateName":      antigate.TemplateName,
+		"variables":         antigate.Variables,
+		"domainsOfInterest": antigate.DomainsOfInterest,
+		"proxyType":         antigate.Proxy.Type,
+		"proxyAddress":      antigate.Proxy.IPAddress,
+		"proxyPort":         antigate.Proxy.Port,
+		"proxyLogin":        antigate.Proxy.Login,
+		"proxyPassword":     antigate.Proxy.Password,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return map[string]interface{}{}, err
+	}
+	return solution, nil
+}
+
+func (ac *Client) SolveImageToCoordinates(body string, settings ImageToCoordinates) ([]interface{}, error) { //, phrase bool, caseSensitive bool, isNumeric bool
+	task := map[string]interface{}{
+		"type":       "ImageToCoordinatesTask",
+		"body":       body,
+		"comment":    settings.Comment,
+		"mode":       settings.Mode,
+		"websiteURL": settings.WebsiteURL,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return []interface{}{}, err
+	}
+	return solution["coordinates"].([]interface{}), nil
 }
 
 func CreateTaskAndWaitForResult(ac *Client, task map[string]interface{}) (map[string]interface{}, error) {
@@ -173,7 +479,7 @@ func CreateTaskAndWaitForResult(ac *Client, task map[string]interface{}) (map[st
 	return nil, errors.New(taskCreateResult["errorCode"].(string))
 }
 
-func (ac *Client) GetCookies() *[]string {
+func (ac *Client) GetCookies() []string {
 	return ac.Cookies
 }
 
@@ -229,7 +535,6 @@ func (ac *Client) JSONRequest(methodName string, payload map[string]interface{})
 	if err != nil {
 		return nil, err
 	}
-
 	client := &http.Client{
 		Timeout: time.Duration(ac.ConnectionTimeout) * time.Second,
 	}
@@ -269,7 +574,7 @@ func (ac *Client) JSONRequest(methodName string, payload map[string]interface{})
 	return response, nil
 }
 
-func readImageFile(filePath string) ([]byte, error) {
+func (ac *Client) ReadImageFile(filePath string) ([]byte, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
