@@ -57,9 +57,16 @@ func main() {
     
     // Solve image captcha
     solution, err := ac.SolveImageFile("captcha.jpg", anticaptcha.ImageSettings{
-        CaseSensitive: true,
-        MaxLength:     5,
-        WebsiteURL:    "https://some-website.com/", // Optional to gather stats in the dashboard by this website
+        // Optional settings, see https://anti-captcha.com/apidoc/task-types/ImageToTextTask for details 
+        // Phrase        true,                         // Set to 'true' if the image has 2 or more words     
+        // CaseSensitive true,                         // Set to 'true' if the image is case-sensitive
+        // Numeric       1,                            // Set numbers mode
+        // MathOperation true,                         // Set to 'true' if the needs a math operation, like result of 50+5
+        // MinLength     1,                            // Set minimum length of the text
+        // MaxLength     10,                           // Set maximum length of the text
+        // LanguagePool  "en",                         // Set language pool to 'en' for English, 'rn' for Russian
+        // Comment       "Type in green characters",   // Optional comment for the task
+        // WebsiteURL:   "https://some-website.com/",  // Optional to collect stats in the dashboard by this website
     })
     // OR 
     // solution, err := ac.SolveImage("image-encoded-in-base64", anticaptcha.ImageSettings{})
@@ -117,7 +124,7 @@ func main() {
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/RecaptchaV2Task):
 ```go
 // Solve Recaptcha V2 with proxy
-solution, err := ac.SolveRecaptchaV2(anticaptcha.RecaptchaV2{
+solution, err := ac.SolveRecaptchaV2ProxyOn(anticaptcha.RecaptchaV2{
     WebsiteURL:  "https://huev.com/",
     WebsiteKey:  "6Lcyu8UZAAAAACwSh6Xf58WrNXTu0LLu4F85xf20",
     IsInvisible: false, // Set to 'true' if you are solving an invisible Recaptcha V2
@@ -130,6 +137,7 @@ solution, err := ac.SolveRecaptchaV2(anticaptcha.RecaptchaV2{
         Login:     "login-optional",
         Password:  "pass-optional",
     },
+})
 ```
 
 &nbsp;
@@ -170,6 +178,7 @@ func main() {
         WebsiteKey: "6LcvNcwdAAAAAMWAuNRXH74u3QePsEzTm6GEjx0J",
         PageAction: "somefun",
         MinScore:   0.9,
+		//IsEnterprise: true, // Set to 'true' if you are solving a Recaptcha V3 Enterprise
     })
     if err != nil {
         log.Fatal(err)
@@ -237,6 +246,7 @@ solution, err := ac.SolveHcaptchaProxyOn(anticaptcha.Hcaptcha{
         Login:     "login-optional",
         Password:  "pass-optional",
     },
+})
 ```
 &nbsp;
 ### Solve FunCaptcha
@@ -296,6 +306,7 @@ solution, err := ac.SolveFunCaptchaProxyOn(anticaptcha.FunCaptcha{
         Login:     "login-optional",
         Password:  "pass-optional",
     },
+})
 ```
 
 &nbsp;
@@ -353,6 +364,7 @@ solution, err := ac.SolveTurnstileProxyOn(anticaptcha.Turnstile{
         Login:     "login-optional",
         Password:  "pass-optional",
     },
+})
 ```
 
 
@@ -411,7 +423,7 @@ func main() {
 
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/GeeTestTask):
 ```go
-// Solve Turnstile with proxy
+// Solve Geetest with proxy
 solution, err := ac.SolveGeeTestProxyOn(anticaptcha.Turnstile{
     WebsiteURL: "https://bitget.com/",
     Gt:         "e9ca9c9ca19ad540a8017f5c107b2d0f",
@@ -423,6 +435,7 @@ solution, err := ac.SolveGeeTestProxyOn(anticaptcha.Turnstile{
         Login:     "login-optional",
         Password:  "pass-optional",
     },
+})
 ```
 
 

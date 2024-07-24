@@ -29,7 +29,7 @@ type Client struct {
 type ImageSettings struct {
 	Phrase        bool
 	CaseSensitive bool
-	Numeric       bool
+	Numeric       int
 	MathOperation bool
 	MinLength     int
 	MaxLength     int
@@ -165,7 +165,7 @@ func (ac *Client) SolveImageFile(path string, settings ImageSettings) (string, e
 	return ac.SolveImage(base64.StdEncoding.EncodeToString(imageData), settings)
 }
 
-func (ac *Client) SolveImage(body string, settings ImageSettings) (string, error) { //, phrase bool, caseSensitive bool, isNumeric bool
+func (ac *Client) SolveImage(body string, settings ImageSettings) (string, error) {
 	task := map[string]interface{}{
 		"type":         "ImageToTextTask",
 		"body":         body,
@@ -460,9 +460,6 @@ func CreateTaskAndWaitForResult(ac *Client, task map[string]interface{}) (map[st
 		"clientKey": ac.ClientKey,
 		"task":      task,
 		"softId":    ac.SoftId,
-	}
-	if task["languagePool"] != nil {
-		payload["languagePool"] = task["languagePool"]
 	}
 	taskCreateResult, err := ac.JSONRequest("createTask", payload)
 	if err != nil {
