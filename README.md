@@ -24,6 +24,8 @@ go get github.com/anti-captcha/anticaptcha-go
 - [Turnstile](#solve-turnstile)
 - [Image to coordinates](#image-to-coordinates)
 - [AntiGate (custom tasks)](#solve-antigate-custom-tasks)
+- [Prosopo](#solve-prosopo)
+- [Friendly Captcha](#solve-friendly-captcha)
 
 ### Solve image captcha with Go example:
 ```go
@@ -547,4 +549,120 @@ func main() {
     fmt.Println("localStorage:", solution["localStorage"])
 }
 ```
+
 &nbsp;
+### Solve Prosopo
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/anti-captcha/anticaptcha-go"
+    "log"
+)
+
+func main() {
+    // Create API client and set the API Key
+    ac := anticaptcha.NewClient("API_KEY_HERE")
+    
+    // set to 'false' to turn off debug output
+    ac.IsVerbose = true
+    
+    // Specify softId to earn 10% commission with your app.
+    // Get your softId here: https://anti-captcha.com/clients/tools/devcenter
+    //ac.SoftId = 1187
+
+    // Make sure the API key funds balance is positive
+    balance, err := ac.GetBalance()
+    if err != nil {
+        log.Fatal(err)
+        // Exit program to make sure you don't DDoS API with requests, while having empty balance
+        return
+    }
+    fmt.Println("Balance:", balance)
+    
+    // Solve Turnstile
+    solution, err := ac.SolveProsopo(anticaptcha.Prosopo{
+        WebsiteURL: "https://www.website.com/",
+        WebsiteKey: "sitekey-here",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Prosopo Token:", solution)
+}
+```
+Also with [proxy](https://anti-captcha.com/apidoc/task-types/ProsopoTask):
+```go
+// Solve Turnstile with proxy
+solution, err := ac.SolveProsopoProxyOn(anticaptcha.Prosopo{
+    WebsiteURL: "https://www.website.com/",
+    WebsiteKey: "sitekey-here",
+    Proxy: &anticaptcha.Proxy{
+        Type:      "http",
+        IPAddress: "1.2.3.4",
+        Port:      1234,
+        Login:     "login-optional",
+        Password:  "pass-optional",
+    },
+})
+```
+
+&nbsp;
+### Solve Friendly Captcha
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/anti-captcha/anticaptcha-go"
+    "log"
+)
+
+func main() {
+    // Create API client and set the API Key
+    ac := anticaptcha.NewClient("API_KEY_HERE")
+    
+    // set to 'false' to turn off debug output
+    ac.IsVerbose = true
+    
+    // Specify softId to earn 10% commission with your app.
+    // Get your softId here: https://anti-captcha.com/clients/tools/devcenter
+    //ac.SoftId = 1187
+
+    // Make sure the API key funds balance is positive
+    balance, err := ac.GetBalance()
+    if err != nil {
+        log.Fatal(err)
+        // Exit program to make sure you don't DDoS API with requests, while having empty balance
+        return
+    }
+    fmt.Println("Balance:", balance)
+    
+    // Solve Turnstile
+    solution, err := ac.SolveFriendlyCaptcha(anticaptcha.FriendlyCaptcha{
+        WebsiteURL: "https://www.website.com/",
+        WebsiteKey: "sitekey-here",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Prosopo Token:", solution)
+}
+```
+Also with [proxy](https://anti-captcha.com/apidoc/task-types/FriendlyCaptchaTask):
+```go
+// Solve Turnstile with proxy
+solution, err := ac.SolveFriendlyCaptchaProxyOn(anticaptcha.FriendlyCaptcha{
+    WebsiteURL: "https://www.website.com/",
+    WebsiteKey: "sitekey-here",
+    Proxy: &anticaptcha.Proxy{
+        Type:      "http",
+        IPAddress: "1.2.3.4",
+        Port:      1234,
+        Login:     "login-optional",
+        Password:  "pass-optional",
+    },
+})
+```
+

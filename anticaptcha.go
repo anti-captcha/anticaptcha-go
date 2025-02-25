@@ -77,6 +77,7 @@ type Hcaptcha struct {
 type FunCaptcha struct {
 	WebsiteURL       string
 	WebsitePublicKey string
+	UserAgent        string
 	ApiSubdomain     string
 	DataBlob         string
 	Proxy            *Proxy
@@ -87,6 +88,18 @@ type Turnstile struct {
 	WebsiteKey string
 	Action     string
 	CData      string
+	Proxy      *Proxy
+}
+
+type Prosopo struct {
+	WebsiteURL string
+	WebsiteKey string
+	Proxy      *Proxy
+}
+
+type FriendlyCaptcha struct {
+	WebsiteURL string
+	WebsiteKey string
 	Proxy      *Proxy
 }
 
@@ -373,6 +386,68 @@ func (ac *Client) SolveTurnstileProxyOn(turnstile Turnstile) (string, error) {
 		"proxyPort":      turnstile.Proxy.Port,
 		"proxyLogin":     turnstile.Proxy.Login,
 		"proxyPassword":  turnstile.Proxy.Password,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveProsopo(prosopo Prosopo) (string, error) {
+	task := map[string]interface{}{
+		"type":       "ProsopoTaskProxyless",
+		"websiteURL": prosopo.WebsiteURL,
+		"websiteKey": prosopo.WebsiteKey,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveProsopoProxyOn(prosopo Prosopo) (string, error) {
+	task := map[string]interface{}{
+		"type":          "ProsopoTask",
+		"websiteURL":    prosopo.WebsiteURL,
+		"websiteKey":    prosopo.WebsiteKey,
+		"proxyType":     prosopo.Proxy.Type,
+		"proxyAddress":  prosopo.Proxy.IPAddress,
+		"proxyPort":     prosopo.Proxy.Port,
+		"proxyLogin":    prosopo.Proxy.Login,
+		"proxyPassword": prosopo.Proxy.Password,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveFriendlyCaptcha(friendlyCaptcha FriendlyCaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":       "FriendlyCaptchaTaskProxyless",
+		"websiteURL": friendlyCaptcha.WebsiteURL,
+		"websiteKey": friendlyCaptcha.WebsiteKey,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveFriendlyCaptchaProxyOn(friendlyCaptcha FriendlyCaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":          "FriendlyCaptchaTask",
+		"websiteURL":    friendlyCaptcha.WebsiteURL,
+		"websiteKey":    friendlyCaptcha.WebsiteKey,
+		"proxyType":     friendlyCaptcha.Proxy.Type,
+		"proxyAddress":  friendlyCaptcha.Proxy.IPAddress,
+		"proxyPort":     friendlyCaptcha.Proxy.Port,
+		"proxyLogin":    friendlyCaptcha.Proxy.Login,
+		"proxyPassword": friendlyCaptcha.Proxy.Password,
 	}
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
