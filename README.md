@@ -15,7 +15,7 @@ go get github.com/anti-captcha/anticaptcha-go
 
 **Examples how to solve:**
 
-- [Image Captcha](#solve-image-captcha-with-go-example)
+- [Image Captcha](#solve-image-captcha)
 - [Recaptcha V2](#solve-recaptcha-v2)
 - [Recaptcha V3](#solve-recaptcha-v3)
 - [hCaptcha](#solve-hcaptcha)
@@ -27,7 +27,7 @@ go get github.com/anti-captcha/anticaptcha-go
 - [Prosopo](#solve-prosopo)
 - [Friendly Captcha](#solve-friendly-captcha)
 
-### Solve image captcha with Go example:
+### Solve image captcha
 ```go
 package main
 
@@ -443,7 +443,7 @@ solution, err := ac.SolveGeeTestProxyOn(anticaptcha.Turnstile{
 
 
 
-### Image to coordinates:
+### Image to coordinates
 
 ```go
 package main
