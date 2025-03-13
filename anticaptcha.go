@@ -84,11 +84,12 @@ type FunCaptcha struct {
 }
 
 type Turnstile struct {
-	WebsiteURL string
-	WebsiteKey string
-	Action     string
-	CData      string
-	Proxy      *Proxy
+	WebsiteURL  string
+	WebsiteKey  string
+	Action      string
+	CData       string
+	ChlPageData string
+	Proxy       *Proxy
 }
 
 type Prosopo struct {
@@ -361,11 +362,12 @@ func (ac *Client) SolveFunCaptchaProxyOn(funcaptcha FunCaptcha) (string, error) 
 
 func (ac *Client) SolveTurnstile(turnstile Turnstile) (string, error) {
 	task := map[string]interface{}{
-		"type":           "TurnstileTaskProxyless",
-		"websiteURL":     turnstile.WebsiteURL,
-		"websiteKey":     turnstile.WebsiteKey,
-		"action":         turnstile.Action,
-		"turnstileCData": turnstile.CData,
+		"type":        "TurnstileTaskProxyless",
+		"websiteURL":  turnstile.WebsiteURL,
+		"websiteKey":  turnstile.WebsiteKey,
+		"action":      turnstile.Action,
+		"cData":       turnstile.CData,
+		"chlPageData": turnstile.ChlPageData,
 	}
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
@@ -376,16 +378,17 @@ func (ac *Client) SolveTurnstile(turnstile Turnstile) (string, error) {
 
 func (ac *Client) SolveTurnstileProxyOn(turnstile Turnstile) (string, error) {
 	task := map[string]interface{}{
-		"type":           "TurnstileTask",
-		"websiteURL":     turnstile.WebsiteURL,
-		"websiteKey":     turnstile.WebsiteKey,
-		"action":         turnstile.Action,
-		"turnstileCData": turnstile.CData,
-		"proxyType":      turnstile.Proxy.Type,
-		"proxyAddress":   turnstile.Proxy.IPAddress,
-		"proxyPort":      turnstile.Proxy.Port,
-		"proxyLogin":     turnstile.Proxy.Login,
-		"proxyPassword":  turnstile.Proxy.Password,
+		"type":          "TurnstileTask",
+		"websiteURL":    turnstile.WebsiteURL,
+		"websiteKey":    turnstile.WebsiteKey,
+		"action":        turnstile.Action,
+		"cData":         turnstile.CData,
+		"chlPageData":   turnstile.ChlPageData,
+		"proxyType":     turnstile.Proxy.Type,
+		"proxyAddress":  turnstile.Proxy.IPAddress,
+		"proxyPort":     turnstile.Proxy.Port,
+		"proxyLogin":    turnstile.Proxy.Login,
+		"proxyPassword": turnstile.Proxy.Password,
 	}
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
