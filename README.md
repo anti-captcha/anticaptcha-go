@@ -346,6 +346,9 @@ func main() {
     solution, err := ac.SolveTurnstile(anticaptcha.Turnstile{
         WebsiteURL: "https://www.website.com/",
         WebsiteKey: "0x4AAAAAAABD2Inoxs-yJ8bz",
+		//Action: "optional page action",
+		//CData: "cdata token for cloudflare",
+		//ChlPageData: "chlPageData token for cloudflare",
     })
     if err != nil {
         log.Fatal(err)
@@ -426,7 +429,7 @@ func main() {
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/GeeTestTask):
 ```go
 // Solve Geetest with proxy
-solution, err := ac.SolveGeeTestProxyOn(anticaptcha.Turnstile{
+solution, err := ac.SolveGeeTestProxyOn(anticaptcha.GeeTest{
     WebsiteURL: "https://bitget.com/",
     Gt:         "e9ca9c9ca19ad540a8017f5c107b2d0f",
     Version:    4,
@@ -581,7 +584,7 @@ func main() {
     }
     fmt.Println("Balance:", balance)
     
-    // Solve Turnstile
+    // Solve Prosopo
     solution, err := ac.SolveProsopo(anticaptcha.Prosopo{
         WebsiteURL: "https://www.website.com/",
         WebsiteKey: "sitekey-here",
@@ -594,10 +597,13 @@ func main() {
 ```
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/ProsopoTask):
 ```go
-// Solve Turnstile with proxy
+// Solve Prosopo with proxy
 solution, err := ac.SolveProsopoProxyOn(anticaptcha.Prosopo{
     WebsiteURL: "https://www.website.com/",
     WebsiteKey: "sitekey-here",
+    //Action: "optional page action",
+    //CData: "cdata token for cloudflare",
+    //ChlPageData: "chlPageData token for cloudflare",
     Proxy: &anticaptcha.Proxy{
         Type:      "http",
         IPAddress: "1.2.3.4",
@@ -639,7 +645,7 @@ func main() {
     }
     fmt.Println("Balance:", balance)
     
-    // Solve Turnstile
+    // Solve Friendly Captcha
     solution, err := ac.SolveFriendlyCaptcha(anticaptcha.FriendlyCaptcha{
         WebsiteURL: "https://www.website.com/",
         WebsiteKey: "sitekey-here",
@@ -652,7 +658,7 @@ func main() {
 ```
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/FriendlyCaptchaTask):
 ```go
-// Solve Turnstile with proxy
+// Solve Friendly Captcha with proxy
 solution, err := ac.SolveFriendlyCaptchaProxyOn(anticaptcha.FriendlyCaptcha{
     WebsiteURL: "https://www.website.com/",
     WebsiteKey: "sitekey-here",
