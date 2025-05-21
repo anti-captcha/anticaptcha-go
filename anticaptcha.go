@@ -104,6 +104,16 @@ type FriendlyCaptcha struct {
 	Proxy      *Proxy
 }
 
+type AmazonCaptcha struct {
+	WebsiteURL      string
+	WebsiteKey      string
+	Iv              string
+	Context         string
+	CaptchaScript   string
+	ChallengeScript string
+	Proxy           *Proxy
+}
+
 type GeeTest struct {
 	WebsiteURL     string
 	Gt             string
@@ -451,6 +461,45 @@ func (ac *Client) SolveFriendlyCaptchaProxyOn(friendlyCaptcha FriendlyCaptcha) (
 		"proxyPort":     friendlyCaptcha.Proxy.Port,
 		"proxyLogin":    friendlyCaptcha.Proxy.Login,
 		"proxyPassword": friendlyCaptcha.Proxy.Password,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveAmazon(amazonCaptcha AmazonCaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":            "AmazonTaskProxyless",
+		"websiteURL":      amazonCaptcha.WebsiteURL,
+		"websiteKey":      amazonCaptcha.WebsiteKey,
+		"iv":              amazonCaptcha.Iv,
+		"context":         amazonCaptcha.Context,
+		"captchaScript":   amazonCaptcha.CaptchaScript,
+		"challengeScript": amazonCaptcha.ChallengeScript,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveAmazonProxyOn(amazonCaptcha AmazonCaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":            "AmazonTask",
+		"websiteURL":      amazonCaptcha.WebsiteURL,
+		"websiteKey":      amazonCaptcha.WebsiteKey,
+		"iv":              amazonCaptcha.Iv,
+		"context":         amazonCaptcha.Context,
+		"captchaScript":   amazonCaptcha.CaptchaScript,
+		"challengeScript": amazonCaptcha.ChallengeScript,
+		"proxyType":       amazonCaptcha.Proxy.Type,
+		"proxyAddress":    amazonCaptcha.Proxy.IPAddress,
+		"proxyPort":       amazonCaptcha.Proxy.Port,
+		"proxyLogin":      amazonCaptcha.Proxy.Login,
+		"proxyPassword":   amazonCaptcha.Proxy.Password,
 	}
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
