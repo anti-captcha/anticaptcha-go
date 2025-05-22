@@ -739,3 +739,4 @@ solution, err := ac.SolveAmazonProxyOn(anticaptcha.FriendlyCaptcha{
     },
 })
 ```
+
