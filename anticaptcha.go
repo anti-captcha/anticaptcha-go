@@ -107,10 +107,12 @@ type FriendlyCaptcha struct {
 type AmazonCaptcha struct {
 	WebsiteURL      string
 	WebsiteKey      string
+	WafType         string
 	Iv              string
 	Context         string
 	CaptchaScript   string
 	ChallengeScript string
+	JsapiScript     string
 	Proxy           *Proxy
 }
 
@@ -474,10 +476,12 @@ func (ac *Client) SolveAmazon(amazonCaptcha AmazonCaptcha) (string, error) {
 		"type":            "AmazonTaskProxyless",
 		"websiteURL":      amazonCaptcha.WebsiteURL,
 		"websiteKey":      amazonCaptcha.WebsiteKey,
+		"wafType":         amazonCaptcha.WafType,
 		"iv":              amazonCaptcha.Iv,
 		"context":         amazonCaptcha.Context,
 		"captchaScript":   amazonCaptcha.CaptchaScript,
 		"challengeScript": amazonCaptcha.ChallengeScript,
+		"jsapiScript":     amazonCaptcha.JsapiScript,
 	}
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
@@ -491,10 +495,12 @@ func (ac *Client) SolveAmazonProxyOn(amazonCaptcha AmazonCaptcha) (string, error
 		"type":            "AmazonTask",
 		"websiteURL":      amazonCaptcha.WebsiteURL,
 		"websiteKey":      amazonCaptcha.WebsiteKey,
+		"wafType":         amazonCaptcha.WafType,
 		"iv":              amazonCaptcha.Iv,
 		"context":         amazonCaptcha.Context,
 		"captchaScript":   amazonCaptcha.CaptchaScript,
 		"challengeScript": amazonCaptcha.ChallengeScript,
+		"jsapiScript":     amazonCaptcha.JsapiScript,
 		"proxyType":       amazonCaptcha.Proxy.Type,
 		"proxyAddress":    amazonCaptcha.Proxy.IPAddress,
 		"proxyPort":       amazonCaptcha.Proxy.Port,

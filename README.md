@@ -676,6 +676,10 @@ solution, err := ac.SolveFriendlyCaptchaProxyOn(anticaptcha.FriendlyCaptcha{
 
 &nbsp;
 ### Solve Amazon WAF
+Two options here:
+1. When captcha is at the bot filtering page and you need aws-was-token cookie:
+  
+Proxy-off version:
 ```go
 package main
 
@@ -705,7 +709,7 @@ func main() {
     }
     fmt.Println("Balance:", balance)
     
-    // Solve Friendly Captcha
+    // Solve Amazon WAF Captcha and get aws-waf-token
     solution, err := ac.SolveAmazon(anticaptcha.AmazonCaptcha{
         WebsiteURL: "https://www.website.com/",
         WebsiteKey: "key_value_from_window.gokuProps_object",
@@ -730,6 +734,36 @@ solution, err := ac.SolveAmazonProxyOn(anticaptcha.FriendlyCaptcha{
     Context: "context_value_from_window.gokuProps_object",
     CaptchaScript: "optional_captcha.js_script_url",
     ChallengeScript: "optional_challenge.js_script_url",
+    Proxy: &anticaptcha.Proxy{
+        Type:      "http",
+        IPAddress: "1.2.3.4",
+        Port:      1234,
+        Login:     "login-optional",
+        Password:  "pass-optional",
+    },
+})
+```
+2. When captcha is a standalone widget which is triggered by user's action:
+  
+Proxy-off:
+```go
+// Solve Amazon WAF Captcha and get a token for later backend submission
+solution, err := ac.SolveAmazon(anticaptcha.AmazonCaptcha{
+    WebsiteURL: "https://www.website.com/",
+    WebsiteKey: "captcha_key_value", // Captcha widget's API key from AwsWafCaptcha.renderCaptcha function
+    WafType: "widget",
+    JsapiScript: "https://164cb210e333.edge.captcha-sdk.awswaf.com/164cb210e333/jsapi.js", // full URL to jsapi.js
+})
+```
+
+Proxy-on:
+```go
+// Solve Amazon WAF captcha with proxy
+solution, err := ac.SolveAmazonProxyOn(anticaptcha.FriendlyCaptcha{
+    WebsiteURL: "https://www.website.com/",
+    WebsiteKey: "captcha_key_value", // Captcha widget's API key from AwsWafCaptcha.renderCaptcha function
+    WafType: "widget",
+    JsapiScript: "https://164cb210e333.edge.captcha-sdk.awswaf.com/164cb210e333/jsapi.js", // full URL to jsapi.js
     Proxy: &anticaptcha.Proxy{
         Type:      "http",
         IPAddress: "1.2.3.4",
