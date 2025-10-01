@@ -104,6 +104,12 @@ type FriendlyCaptcha struct {
 	Proxy      *Proxy
 }
 
+type AltchaCaptcha struct {
+	WebsiteURL   string
+	ChallengeURL string
+	Proxy        *Proxy
+}
+
 type AmazonCaptcha struct {
 	WebsiteURL      string
 	WebsiteKey      string
@@ -463,6 +469,37 @@ func (ac *Client) SolveFriendlyCaptchaProxyOn(friendlyCaptcha FriendlyCaptcha) (
 		"proxyPort":     friendlyCaptcha.Proxy.Port,
 		"proxyLogin":    friendlyCaptcha.Proxy.Login,
 		"proxyPassword": friendlyCaptcha.Proxy.Password,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveAltcha(altchaCaptcha AltchaCaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":         "AltchaTaskProxyless",
+		"websiteURL":   altchaCaptcha.WebsiteURL,
+		"challengeURL": altchaCaptcha.ChallengeURL,
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	return solution["token"].(string), nil
+}
+
+func (ac *Client) SolveAltchaProxyOn(altchaCaptcha AltchaCaptcha) (string, error) {
+	task := map[string]interface{}{
+		"type":          "AltchaCaptchaTask",
+		"websiteURL":    altchaCaptcha.WebsiteURL,
+		"challengeURL":  altchaCaptcha.ChallengeURL,
+		"proxyType":     altchaCaptcha.Proxy.Type,
+		"proxyAddress":  altchaCaptcha.Proxy.IPAddress,
+		"proxyPort":     altchaCaptcha.Proxy.Port,
+		"proxyLogin":    altchaCaptcha.Proxy.Login,
+		"proxyPassword": altchaCaptcha.Proxy.Password,
 	}
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {

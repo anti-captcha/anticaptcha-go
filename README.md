@@ -27,6 +27,7 @@ go get github.com/anti-captcha/anticaptcha-go
 - [Prosopo](#solve-prosopo)
 - [Friendly Captcha](#solve-friendly-captcha)
 - [Amazon WAF](#solve-amazon-waf)
+- [Altcha](#solve-altcha)
 
 ### Solve image captcha
 ```go
@@ -773,4 +774,63 @@ solution, err := ac.SolveAmazonProxyOn(anticaptcha.FriendlyCaptcha{
     },
 })
 ```
+
+&nbsp;
+### Solve Altcha
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/anti-captcha/anticaptcha-go"
+    "log"
+)
+
+func main() {
+    // Create API client and set the API Key
+    ac := anticaptcha.NewClient("API_KEY_HERE")
+    
+    // set to 'false' to turn off debug output
+    ac.IsVerbose = true
+    
+    // Specify softId to earn 10% commission with your app.
+    // Get your softId here: https://anti-captcha.com/clients/tools/devcenter
+    //ac.SoftId = 1187
+
+    // Make sure the API key funds balance is positive
+    balance, err := ac.GetBalance()
+    if err != nil {
+        log.Fatal(err)
+        // Exit program to make sure you don't DDoS API with requests, while having empty balance
+        return
+    }
+    fmt.Println("Balance:", balance)
+    
+    // Solve Prosopo
+    solution, err := ac.SolveProsopo(anticaptcha.AltchaCaptcha{
+        WebsiteURL:   "https://www.website.com/",
+        ChallengeURL: "/some/path/to/challenge/url",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Altcha Token:", solution)
+}
+```
+Also with [proxy](https://anti-captcha.com/apidoc/task-types/AltchaTask):
+```go
+// Solve Prosopo with proxy
+solution, err := ac.SolveAltchaProxyOn(anticaptcha.AltchaCaptcha{
+    WebsiteURL:  "https://www.website.com/",
+    ChallengeURL: "/some/path/to/challenge/url",
+    Proxy: &anticaptcha.Proxy{
+        Type:      "http",
+        IPAddress: "1.2.3.4",
+        Port:      1234,
+        Login:     "login-optional",
+        Password:  "pass-optional",
+    },
+})
+```
+
 
