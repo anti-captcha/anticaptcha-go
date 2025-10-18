@@ -809,7 +809,10 @@ func main() {
     // Solve Prosopo
     solution, err := ac.SolveProsopo(anticaptcha.AltchaCaptcha{
         WebsiteURL:   "https://www.website.com/",
+        // Option 1: use challenge URL (use one of the options!)
         ChallengeURL: "/some/path/to/challenge/url",
+        // Option 2: use challenge JSON:
+        ChallengeJSON: `{"algorithm":"SHA-256","challenge":"1a40f7ba3393f9513016879de41c7221f14e563856de2f647233a00accf9c28b","salt":"0887f273d79df143355b9e5f","signature":"1de2bbf282420aef6ca0a84c38c85e2b1e40023d28bef72278d735555a8f47fb"}`,
     })
     if err != nil {
         log.Fatal(err)

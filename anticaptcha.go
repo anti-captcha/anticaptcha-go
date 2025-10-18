@@ -105,9 +105,10 @@ type FriendlyCaptcha struct {
 }
 
 type AltchaCaptcha struct {
-	WebsiteURL   string
-	ChallengeURL string
-	Proxy        *Proxy
+	WebsiteURL    string
+	ChallengeURL  string
+	ChallengeJSON string
+	Proxy         *Proxy
 }
 
 type AmazonCaptcha struct {
@@ -479,9 +480,10 @@ func (ac *Client) SolveFriendlyCaptchaProxyOn(friendlyCaptcha FriendlyCaptcha) (
 
 func (ac *Client) SolveAltcha(altchaCaptcha AltchaCaptcha) (string, error) {
 	task := map[string]interface{}{
-		"type":         "AltchaTaskProxyless",
-		"websiteURL":   altchaCaptcha.WebsiteURL,
-		"challengeURL": altchaCaptcha.ChallengeURL,
+		"type":          "AltchaTaskProxyless",
+		"websiteURL":    altchaCaptcha.WebsiteURL,
+		"challengeURL":  altchaCaptcha.ChallengeURL,
+		"challengeJSON": altchaCaptcha.ChallengeJSON,
 	}
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
@@ -495,6 +497,7 @@ func (ac *Client) SolveAltchaProxyOn(altchaCaptcha AltchaCaptcha) (string, error
 		"type":          "AltchaCaptchaTask",
 		"websiteURL":    altchaCaptcha.WebsiteURL,
 		"challengeURL":  altchaCaptcha.ChallengeURL,
+		"challengeJSON": altchaCaptcha.ChallengeJSON,
 		"proxyType":     altchaCaptcha.Proxy.Type,
 		"proxyAddress":  altchaCaptcha.Proxy.IPAddress,
 		"proxyPort":     altchaCaptcha.Proxy.Port,
