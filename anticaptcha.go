@@ -24,6 +24,7 @@ type Client struct {
 	HcaptchaUserAgent string
 	HcaptchaRespKey   string
 	Cookies           []string
+	WorkersUserAgent  string
 }
 
 type ImageSettings struct {
@@ -155,6 +156,7 @@ func NewClient(apiKey string) *Client {
 		NormalWaitingInterval:       5,
 		IsVerbose:                   true,
 		SoftId:                      1187,
+		WorkersUserAgent:            "",
 	}
 	return &ac
 }
@@ -268,6 +270,9 @@ func (ac *Client) SolveRecaptchaV2ProxyOn(recaptcha RecaptchaV2) (string, error)
 	if err != nil {
 		return "", err
 	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
+	}
 	if cookies, ok := solution["cookies"].([]string); ok {
 		ac.Cookies = cookies
 	}
@@ -287,6 +292,9 @@ func (ac *Client) SolveRecaptchaV3(recaptcha RecaptchaV3) (string, error) {
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
 		return "", err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
 	}
 	return solution["gRecaptchaResponse"].(string), nil
 }
@@ -356,6 +364,9 @@ func (ac *Client) SolveFunCaptcha(funcaptcha FunCaptcha) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
+	}
 	return solution["token"].(string), nil
 }
 
@@ -376,6 +387,9 @@ func (ac *Client) SolveFunCaptchaProxyOn(funcaptcha FunCaptcha) (string, error) 
 	if err != nil {
 		return "", err
 	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
+	}
 	return solution["token"].(string), nil
 }
 
@@ -391,6 +405,9 @@ func (ac *Client) SolveTurnstile(turnstile Turnstile) (string, error) {
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
 		return "", err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
 	}
 	return solution["token"].(string), nil
 }
@@ -413,6 +430,9 @@ func (ac *Client) SolveTurnstileProxyOn(turnstile Turnstile) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
+	}
 	return solution["token"].(string), nil
 }
 
@@ -425,6 +445,9 @@ func (ac *Client) SolveProsopo(prosopo Prosopo) (string, error) {
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
 		return "", err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
 	}
 	return solution["token"].(string), nil
 }
@@ -444,6 +467,9 @@ func (ac *Client) SolveProsopoProxyOn(prosopo Prosopo) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
+	}
 	return solution["token"].(string), nil
 }
 
@@ -456,6 +482,9 @@ func (ac *Client) SolveFriendlyCaptcha(friendlyCaptcha FriendlyCaptcha) (string,
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
 		return "", err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
 	}
 	return solution["token"].(string), nil
 }
@@ -475,6 +504,9 @@ func (ac *Client) SolveFriendlyCaptchaProxyOn(friendlyCaptcha FriendlyCaptcha) (
 	if err != nil {
 		return "", err
 	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
+	}
 	return solution["token"].(string), nil
 }
 
@@ -488,6 +520,9 @@ func (ac *Client) SolveAltcha(altchaCaptcha AltchaCaptcha) (string, error) {
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
 		return "", err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
 	}
 	return solution["token"].(string), nil
 }
@@ -508,6 +543,9 @@ func (ac *Client) SolveAltchaProxyOn(altchaCaptcha AltchaCaptcha) (string, error
 	if err != nil {
 		return "", err
 	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
+	}
 	return solution["token"].(string), nil
 }
 
@@ -526,6 +564,9 @@ func (ac *Client) SolveAmazon(amazonCaptcha AmazonCaptcha) (string, error) {
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
 		return "", err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
 	}
 	return solution["token"].(string), nil
 }
@@ -551,6 +592,9 @@ func (ac *Client) SolveAmazonProxyOn(amazonCaptcha AmazonCaptcha) (string, error
 	if err != nil {
 		return "", err
 	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
+	}
 	return solution["token"].(string), nil
 }
 
@@ -567,6 +611,9 @@ func (ac *Client) SolveGeeTest(geetest GeeTest) (map[string]interface{}, error) 
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
 		return map[string]interface{}{}, err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
 	}
 	return solution, nil
 }
@@ -589,6 +636,9 @@ func (ac *Client) SolveGeeTestProxyOn(geetest GeeTest) (map[string]interface{}, 
 	solution, err := CreateTaskAndWaitForResult(ac, task)
 	if err != nil {
 		return map[string]interface{}{}, err
+	}
+	if userAgent, ok := solution["userAgent"].(string); ok {
+		ac.WorkersUserAgent = userAgent
 	}
 	return solution, nil
 }

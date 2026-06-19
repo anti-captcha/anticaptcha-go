@@ -123,6 +123,8 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println("Recaptcha g-response token:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
 }
 ```
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/RecaptchaV2Task):
@@ -188,6 +190,8 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println("Recaptcha g-response token:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
 }
 ```
 &nbsp;
@@ -294,6 +298,8 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println("Funcaptcha Token:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
 }
 ```
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/FunCaptchaTask):
@@ -356,6 +362,8 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println("Turnstile Token:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
 }
 ```
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/TurnstileTask):
@@ -424,6 +432,8 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println("Captcha Solution:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
 }
 ```
 &nbsp;
@@ -595,6 +605,8 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println("Prosopo Token:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
 }
 ```
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/ProsopoTask):
@@ -656,6 +668,8 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println("Friendly Captcha Token:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
 }
 ```
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/FriendlyCaptchaTask):
@@ -723,6 +737,8 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println("aws-waf-token:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
 }
 ```
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/FriendlyCaptchaTask):
@@ -818,6 +834,8 @@ func main() {
         log.Fatal(err)
     }
     fmt.Println("Altcha Token:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
 }
 ```
 Also with [proxy](https://anti-captcha.com/apidoc/task-types/AltchaTask):
