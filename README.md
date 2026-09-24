@@ -148,6 +148,80 @@ solution, err := ac.SolveRecaptchaV2ProxyOn(anticaptcha.RecaptchaV2{
 
 &nbsp;
 
+
+### Solve Recaptcha V2 Enterprise
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/anti-captcha/anticaptcha-go"
+    "log"
+)
+
+func main() {
+    // Create API client and set the API Key
+    ac := anticaptcha.NewClient("API_KEY_HERE")
+    
+    // set to 'false' to turn off debug output
+    ac.IsVerbose = true
+    
+    // Specify softId to earn 10% commission with your app.
+    // Get your softId here: https://anti-captcha.com/clients/tools/devcenter
+    //ac.SoftId = 1187
+
+    // Make sure the API key funds balance is positive
+    balance, err := ac.GetBalance()
+    if err != nil {
+        log.Fatal(err)
+        // Exit program to make sure you don't DDoS API with requests, while having empty balance
+        return
+    }
+    fmt.Println("Balance:", balance)
+    
+    // Solve Recaptcha V2
+    solution, err := ac.SolveRecaptchaV2Enterprise(anticaptcha.RecaptchaV2{
+        WebsiteURL:  "https://huev.com/",
+        WebsiteKey:  "6Lcyu8UZAAAAACwSh6Xf58WrNXTu0LLu4F85xf20",
+        IsInvisible: false, // Set to "true" if there's "size":"invisible" option in "grecaptcha.enterprise.render" function
+        EnterprisePayload:  map[string]interface{}{
+			"action": "form_submit",
+			"s": "TEMPORARY_TOKEN_VALUE_IF_PRESENT",
+        },
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Recaptcha g-response token:", solution)
+    // In case you need the worker's user-agent
+    fmt.Println("User-Agent:", ac.WorkersUserAgent)
+}
+```
+Also with [proxy](https://anti-captcha.com/apidoc/task-types/RecaptchaV2Task):
+```go
+// Solve Recaptcha V2 with proxy
+solution, err := ac.SolveRecaptchaV2EnterpriseProxyOn(anticaptcha.RecaptchaV2{
+    WebsiteURL:  "https://huev.com/",
+    WebsiteKey:  "6Lcyu8UZAAAAACwSh6Xf58WrNXTu0LLu4F85xf20",
+	IsInvisible: false, // Set to "true" if there's "size":"invisible" option in "grecaptcha.enterprise.render" function
+    EnterprisePayload:  map[string]interface{}{
+        "action": "form_submit",
+        "s": "TEMPORARY_TOKEN_VALUE_IF_PRESENT",
+    },
+    UserAgent:   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+    Proxy: &anticaptcha.Proxy{
+        Type:      "http",
+        IPAddress: "1.2.3.4",
+        Port:      1234,
+        Login:     "login-optional",
+        Password:  "pass-optional",
+    },
+})
+```
+
+&nbsp;
+
+
 ### Solve Recaptcha V3
 ```go
 package main

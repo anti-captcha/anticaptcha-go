@@ -48,13 +48,14 @@ type Proxy struct {
 }
 
 type RecaptchaV2 struct {
-	WebsiteURL    string
-	WebsiteKey    string
-	WebsiteSToken string
-	IsInvisible   bool
-	DataSValue    string
-	UserAgent     string
-	Proxy         *Proxy
+	WebsiteURL        string
+	WebsiteKey        string
+	WebsiteSToken     string
+	IsInvisible       bool
+	DataSValue        string
+	UserAgent         string
+	EnterprisePayload map[string]interface{}
+	Proxy             *Proxy
 }
 
 type RecaptchaV3 struct {
@@ -272,6 +273,56 @@ func (ac *Client) SolveRecaptchaV2ProxyOn(recaptcha RecaptchaV2) (string, error)
 	}
 	if userAgent, ok := solution["userAgent"].(string); ok {
 		ac.WorkersUserAgent = userAgent
+	}
+	if cookies, ok := solution["cookies"].([]string); ok {
+		ac.Cookies = cookies
+	}
+	return solution["gRecaptchaResponse"].(string), nil
+}
+
+func (ac *Client) SolveRecaptchaV2Enterprise(recaptcha RecaptchaV2) (string, error) {
+	task := map[string]interface{}{
+		"type":                "RecaptchaV2EnterpriseTaskProxyless",
+		"websiteURL":          recaptcha.WebsiteURL,
+		"websiteKey":          recaptcha.WebsiteKey,
+		"websiteSToken":       recaptcha.WebsiteSToken,
+		"recaptchaDataSValue": recaptcha.DataSValue,
+		"enterprisePayload":   recaptcha.EnterprisePayload,
+	}
+	if recaptcha.IsInvisible {
+		task["isInvisible"] = true
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
+	}
+	if cookies, ok := solution["cookies"].([]string); ok {
+		ac.Cookies = cookies
+	}
+	return solution["gRecaptchaResponse"].(string), nil
+}
+
+func (ac *Client) SolveRecaptchaV2EnterpriseProxyOn(recaptcha RecaptchaV2) (string, error) {
+	task := map[string]interface{}{
+		"type":                "RecaptchaV2EnterpriseTask",
+		"websiteURL":          recaptcha.WebsiteURL,
+		"websiteKey":          recaptcha.WebsiteKey,
+		"websiteSToken":       recaptcha.WebsiteSToken,
+		"recaptchaDataSValue": recaptcha.DataSValue,
+		"enterprisePayload":   recaptcha.EnterprisePayload,
+		"userAgent":           recaptcha.UserAgent,
+		"proxyType":           recaptcha.Proxy.Type,
+		"proxyAddress":        recaptcha.Proxy.IPAddress,
+		"proxyPort":           recaptcha.Proxy.Port,
+		"proxyLogin":          recaptcha.Proxy.Login,
+		"proxyPassword":       recaptcha.Proxy.Password,
+	}
+	if recaptcha.IsInvisible {
+		task["isInvisible"] = true
+	}
+	solution, err := CreateTaskAndWaitForResult(ac, task)
+	if err != nil {
+		return "", err
 	}
 	if cookies, ok := solution["cookies"].([]string); ok {
 		ac.Cookies = cookies
